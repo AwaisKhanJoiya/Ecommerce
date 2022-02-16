@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+      crossorigin="anonymous"
+    />
+
+    <title>Online Phones | An eCommerce Website</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Online Phones</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="index.html">Home</a>
+                    </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="admin_link" style="cursor: pointer;">Admin Panel</a>
+                            </li>
+    
+                </ul>
+    
+              
+                    <div id="logged_in">
+                      <a type="button" href="cart.html" class="btn btn-outline-warning me-2">
+                        Cart <span class="badge bg-secondary" id="cart_items">0</span></a>
+                        <a type="button" id="logout" class="btn btn-outline-warning">
+                            Log Out
+                        </a>
+                </div>
+                    <div id="logged_out">
+                    <a type="button" href="login.html" class="btn btn-outline-warning me-2">
+                        Login
+                    </a>
+                    <a type="button" href="signup.html" class="btn btn-outline-warning">
+                        Sign up
+                    </a>
+                </div>
+                  
+    
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1 class="text-center mt-2">Your Cart Items</h1>
+        <div class="row" id="cart">
+            
+                    
+                   
+           
+        </div>
+    </div>
+  </body>
+</html>
+<footer class="my-0">
+    <div class="alert alert-success text-center text-muted mb-0" role="alert">
+        Copyright © onlinephones | All rights reserved
+    </div>
+</footer>
+
+<!-- Optional JavaScript; choose one of the two! -->
+
+<!-- Option 1: Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous">
+</script>
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+crossorigin="anonymous"
+referrerpolicy="no-referrer"
+></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<script>
+  if(Cookies.get('jwt')){
+    $("#logged_out").hide();
+  }else{
+    $("#logged_in").hide()
+  }
+
+  if(Cookies.get("cart")){
+    let cart = JSON.parse(Cookies.get("cart"));
+    $("#cart_items").text(cart.length)
+    cart.forEach(id => {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:3000/product/" + id,
+            success: function (data) {
+                let element = data[0];
+                $("#cart").append(` <div class="col-lg-3 col-md-4 col-sm-12">
+                    <div class="card mb-2">
+              <h6 class="card-title bg-info text-white p-2 text-uppercase">
+                ${element.name}
+              </h6>
+
+              <div class="card-body">
+                <img
+                  src="http://localhost:3000${element.image}"
+                  alt="${element.name}"
+                  class="img-fluid mb-2"
+                />
+                <p class="card-text">
+                  ${element.description}
+                </p>
+                <h6>$${element.price}<span class="text-success"
+                    >(${element.discount}% off)</span
+                  >
+                </h6>
+              </div>
+                        <div class="btn-group d-flex">
+                            <input type="submit" name="event" value="Remove" class="btn btn-success flex-fill">
+                            <input type="submit" name="event" value="Buy Now" class="btn btn-warning flex-fill">
+                        </div>
+                </div>
+            </div>`)
+        }
+        })
+    });
+   
+  }else{
+      $("#cart").html(`<div class="d-flex justify-content-center">
+                        <h2 class="display-4 text-primary">Cart is empty</h2>
+                    </div>`)
+
+  }
+
+
+
+  $("#logout").click((e)=>{
+    e.preventDefault()
+    Cookies.remove('jwt')
+    Cookies.remove("user_id");
+    Cookies.remove("userInfo");
+    window.location.href = "/"
+  })
+
+  const add = (id) =>{
+    let cart;
+    if(Cookies.get("cart")){
+      cart = JSON.parse(Cookies.get("cart"));
+      cart.push(id)
+      Cookies.set("cart", JSON.stringify(cart));
+    }else{
+      cart = [id]
+      Cookies.set("cart", JSON.stringify(cart));
+    }
+    alert("Item added to cart")
+    window.location.href = "/"
+  }
+
+
+
+  $("#admin_link").click((e)=>{
+    e.preventDefault()
+    if(Cookies.get("jwt")){
+    window.location.href = "/admin"
+
+    }else{
+      alert("Please Login First")
+    }
+  })
+
+
+
+</script>
+
+<!-- Option 2: Separate Popper and Bootstrap JS -->
+<!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc" crossorigin="anonymous"></script>
+    -->
+</body>
+
+</html>
